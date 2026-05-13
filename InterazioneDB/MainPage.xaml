@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="SimulazioneApp.MainPage">
+    <ScrollView><VerticalStackLayout Spacing="10" Padding="20" VerticalOptions="Center">
+        <Button Text="Registrazione" Clicked="OnGoToRegistrazione" />
+        <Button Text="Login" Clicked="OnGoToLogin" />
+        <Button Text="Logout" Clicked="OnGoToLogout" />
+        <Button Text="Modifica Password" Clicked="OnGoToModificaPwd" />
+        <Button Text="Lista Dipendenti" Clicked="OnGoToListaDip" />
+        <Button Text="Calcola Codice Fiscale" Clicked="OnGoToCF" />
+        <Button Text="Esci" Clicked="OnExitApp" />
+    </VerticalStackLayout></ScrollView>
+</ContentPage>
