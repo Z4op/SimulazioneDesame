@@ -2,53 +2,48 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Logout</title>
   <style>
     body { font-family: system-ui; max-width: 400px; margin: 40px auto; padding: 20px; }
     input, button { width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
-    button { background: #3498db; color: white; border: none; cursor: pointer; }
-    #msg, #tokenBox { padding: 10px; border-radius: 4px; display: none; margin-top: 10px; word-break: break-all; }
+    button { background: #e74c3c; color: white; border: none; cursor: pointer; }
+    #msg { padding: 10px; border-radius: 4px; display: none; margin-top: 10px; }
     .ok { background: #d4edda; color: #155724; }
     .err { background: #f8d7da; color: #721c24; }
-    #tokenBox { background: #e2e3e5; font-family: monospace; font-size: 0.9em; }
     a { display: block; text-align: center; margin-top: 15px; }
   </style>
 </head>
 <body>
-  <h2>🔑 Login</h2>
-  <form id="formLogin">
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Accedi</button>
+  <h2>🚪 Logout</h2>
+  <form id="formLogout">
+    <label>Token (auto-compilato se disponibile)</label>
+    <input type="text" id="token" placeholder="Incolla qui il token">
+    <button type="submit">Esegui Logout</button>
   </form>
   <div id="msg"></div>
-  <div id="tokenBox">🔑 Token: <span id="tokenVal"></span></div>
   <a href="index.html">← Torna al Menu</a>
 
   <script>
-    const API = 'http://127.0.0.1:5000/api/login';
-    document.getElementById('formLogin').onsubmit = async (e) => {
+    const API = 'http://127.0.0.1:5000/api/logout';
+    document.getElementById('token').value = sessionStorage.getItem('token') || '';
+    document.getElementById('formLogout').onsubmit = async (e) => {
       e.preventDefault();
       const msg = document.getElementById('msg');
-      const tokenBox = document.getElementById('tokenBox');
+      const token = document.getElementById('token').value.trim();
+      if (!token) { alert('Inserisci il token'); return; }
       try {
         const res = await fetch(API, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            Email: document.getElementById('email').value,
-            Password: document.getElementById('password').value
-          })
+          body: JSON.stringify({ Token: token })
         });
         const data = await res.json();
         msg.className = data.success ? 'ok' : 'err';
         msg.textContent = data.message;
         msg.style.display = 'block';
-        
         if (data.success) {
-          sessionStorage.setItem('token', data.token);
-          document.getElementById('tokenVal').textContent = data.token;
-          tokenBox.style.display = 'block';
+          sessionStorage.removeItem('token');
+          document.getElementById('token').value = '';
         }
       } catch (err) {
         msg.className = 'err'; msg.textContent = 'Errore di rete'; msg.style.display = 'block';

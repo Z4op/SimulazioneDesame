@@ -1,10 +1,13 @@
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+import datetime
 import pyodbc
 import uuid
-import datetime
-from flask import Flask, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5000"]}})
 
 # Configurazione Connessione
 DB_CONN = (
@@ -18,14 +21,33 @@ def get_conn():
 
 # Helpers
 def valida_token(token):
-    if not token: return False
-    conn = get_conn(); cur = conn.cursor()
+    if not token: 
+        return False
+    conn = get_conn()
+    cur = conn.cursor()
     cur.execute("SELECT DataOraScadenzaToken FROM TUsers WHERE Token = ?", (token,))
     row = cur.fetchone()
     conn.close()
-    return row and row[0] and row[0] > datetime.datetime.now()
+    
+    if row and row[0]:
+        expiry = row[0]
+        # Se il driver restituisce una stringa, la convertiamo in datetime
+        if isinstance(expiry, str):
+            try:
+                # Formato standard MySQL: 'YYYY-MM-DD HH:MM:SS'
+                expiry = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                # Fallback per formati con millisecondi
+                expiry = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
+                
+        return expiry > datetime.datetime.now()
+    return False
 
 def calcola_codice_fiscale(cognome, nome, nascita, sesso, cc):
+    if isinstance(nascita, str):
+        from datetime import datetime
+        nascita = datetime.strptime(nascita, "%Y-%m-%d").date()
+    
     mesi = "ABCDEHLMPRST"
     get_c = lambda s: ([c for c in s.upper() if c not in 'AEIOU '] + [c for c in s.upper() if c in 'AEIOU'] + ['X']*3)[:3]
     codice = f"{''.join(get_c(cognome))}{''.join(get_c(nome))}{nascita.year%100:02d}{mesi[nascita.month-1]}{nascita.day + (40 if sesso=='F' else 0):02d}{cc}"
@@ -132,16 +154,41 @@ def codice_fiscale():
     conn = get_conn(); cur = conn.cursor()
     cur.execute("SELECT Cognome, Nome, DataNascita, Sesso, ComuneNascita, ProvinciaNascita FROM TDipendenti WHERE DipendenteID = ?", (data['DipendenteID'],))
     emp = cur.fetchone()
-    if not emp: return jsonify({"success": False, "message": "Dipendente non trovato"}), 404
+    if not emp: 
+        return jsonify({"success": False, "message": "Dipendente non trovato"}), 404
 
     # Lookup Codice Catastale
     cur.execute("SELECT CodiceCatastale FROM TCodiciCatastali WHERE Comune = ? AND Provincia = ?", (emp[4], emp[5]))
     cc_row = cur.fetchone()
-    if not cc_row: return jsonify({"success": False, "message": "Codice catastale non trovato"}), 404
+    if not cc_row: 
+        return jsonify({"success": False, "message": "Codice catastale non trovato"}), 404
     
     conn.close()
-    cf = calcola_codice_fiscale(emp[0], emp[1], emp[2], emp[3], cc_row[0])
+    
+    # === CONVERSIONE DATA ===
+    from datetime import datetime
+    nascita = emp[2]  # Dal DB arriva come stringa "YYYY-MM-DD"
+    if isinstance(nascita, str):
+        nascita = datetime.strptime(nascita, "%Y-%m-%d").date()
+    # =======================
+    
+    cf = calcola_codice_fiscale(emp[0], emp[1], nascita, emp[3], cc_row[0])
     return jsonify({"success": True, "CodiceFiscale": cf})
+
+@app.route("/", methods=["POST", "GET"])
+def main():
+    return render_template("index.html")
+
+@app.route('/web/<path:filename>')
+def web_static(filename):
+    """Serve file statici dalla cartella web/static"""
+    return render_template(os.path.join('static'), filename)
+
+@app.route('/<path:path>')
+def catch_all(path):
+    """Redirect alla SPA per routing frontend (opzionale)"""
+    return {"error": "Endpoint non trovato"}, 404
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host="0.0.0.0")
