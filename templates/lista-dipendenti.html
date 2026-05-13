@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Lista Dipendenti</title>
+<style>table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;} input,button{margin-bottom:10px;padding:8px;}</style></head>
+<body>
+  <input type="text" id="token" placeholder="Token (auto-compilato se disponibile)">
+  <button onclick="caricaDipendenti()">Visualizza Dipendenti</button>
+  <table id="tabella"><thead><tr><th>ID</th><th>Cognome</th><th>Nome</th><th>Nascita</th><th>Sesso</th><th>Comune</th><th>Prov.</th></tr></thead><tbody></tbody></table>
+<script>
+document.getElementById('token').value = sessionStorage.getItem('token') || '';
+async function caricaDipendenti() {
+  const res = await fetch('http://127.0.0.1:5000/api/lista-dipendenti', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({Token: document.getElementById('token').value})
+  });
+  const data = await res.json();
+  if(data.success) {
+    const tbody = document.querySelector('#tabella tbody'); tbody.innerHTML = '';
+    data.dipendenti.forEach(d => tbody.innerHTML += `<tr><td>${d.DipendenteID}</td><td>${d.Cognome}</td><td>${d.Nome}</td><td>${d.DataNascita}</td><td>${d.Sesso}</td><td>${d.ComuneNascita}</td><td>${d.ProvinciaNascita}</td></tr>`);
+  } else { alert(data.message); }
+}
+</script></body></html>

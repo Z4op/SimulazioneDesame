@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head><meta charset="UTF-8"><title>Login</title>
+    <style>form{max-width:300px;margin:auto;display:flex;flex-direction:column;gap:10px;} input,button{padding:10px;}</style></head>
+    <body>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="result" style="margin-top:20px;"></div>
+        <script>
+        document.getElementById('loginForm').onsubmit = async e => {
+            e.preventDefault();
+            const res = await fetch('http://127.0.0.1:5000/api/login', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({Email:email.value, Password:password.value})
+        });
+        const data = await res.json();
+        if(data.success) {
+            document.getElementById('result').innerHTML = `<strong>Token:</strong> <span id="token">${data.token}</span><br>
+                <small>Token salvato in sessionStorage per le altre pagine.</small>`;
+                sessionStorage.setItem('token', data.token);
+        } else {
+            document.getElementById('result').textContent = data.message;
+            }
+        };
+        </script>
+    </body>
+</html>
