@@ -22,11 +22,12 @@ python3 -m pip install -r requiremets.txt
 
 ## 3). installo docker
 dipende a seconda del sistema operativo
-
 ```
+https://www.docker.com/products/docker-desktop/
 ```
 
 ## 4). Attivo il DataBase
+attivo il database mysql aperto sulla porta 3305 del localhost
 ```
 docker run --name SimulazioneEsame \
     -d -e MYSQL_ROOT_PASSWORD=SimulazioneEsame \
@@ -35,7 +36,28 @@ docker run --name SimulazioneEsame \
 ```
 
 ## 4). faccio il setup del database
-quindi vado nella
+quindi vado nella directory SetUpDB eseguo lo script query_db.py
+```
+cd SetUpDB
+```
+esecuzione
+```
+python3 query_db.py
+```
+torno alla main directory
+```
+cd ..
 ```
 
+
+## 5). avvio l'applicazione con interfaccia web
 ```
+python3 app.py
+```
+
+## 6). apro un browser e vedo il risultato
+```
+http://localhost:5000/
+```
+
+*P.S. per una visione del databe completa utilizzare il software beekeeper o quasiasi altro software desiderato per la visione dei database*
