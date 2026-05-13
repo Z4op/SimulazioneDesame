@@ -1,11 +1,11 @@
 # Simulazione d'esame
 
 ## 1). creare un ambiente virtual in python3
---creo l'ambiente virtuale
+--creo l'ambiente virtuale--
 ```
 python3 -m venv .env
 ```
---attivare l'ambiente virtuale
+--attivare l'ambiente virtuale--
 ```
 
 ```
