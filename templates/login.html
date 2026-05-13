@@ -23,9 +23,12 @@
   </form>
   <div id="msg"></div>
   <div id="tokenBox">🔑 Token: <span id="tokenVal"></span></div>
-  <a href="index.html">← Torna al Menu</a>
+  <button id="turnBack">← Torna al Menu</button>
 
   <script>
+    document.getElementById("turnBack").addEventListener("click", function(){
+      window.location = "/";
+    });
     const API = 'http://127.0.0.1:5000/api/login';
     document.getElementById('formLogin').onsubmit = async (e) => {
       e.preventDefault();

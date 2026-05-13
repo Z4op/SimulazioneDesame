@@ -179,15 +179,30 @@ def codice_fiscale():
 def main():
     return render_template("index.html")
 
-@app.route('/web/<path:filename>')
-def web_static(filename):
-    """Serve file statici dalla cartella web/static"""
-    return render_template(os.path.join('static'), filename)
+@app.route('/registrazione.html')
+def pagina_registrazione():
+    return render_template('registrazione.html')
 
-@app.route('/<path:path>')
-def catch_all(path):
-    """Redirect alla SPA per routing frontend (opzionale)"""
-    return {"error": "Endpoint non trovato"}, 404
+@app.route('/login.html')
+def pagina_login():
+    return render_template('login.html')
+
+@app.route('/logout.html')
+def pagina_logout():
+    return render_template('logout.html')
+
+@app.route('/modifica-password.html')
+def pagina_modifica_password():
+    return render_template('modifica-password.html')
+
+@app.route('/lista-dipendenti.html')
+def pagina_lista_dipendenti():
+    return render_template('lista-dipendenti.html')
+
+@app.route('/codice-fiscale.html')
+def pagina_codice_fiscale():
+    return render_template('codice-fiscale.html')
+
 
 
 if __name__ == '__main__':
