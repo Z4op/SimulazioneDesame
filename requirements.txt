@@ -1,3 +1,6 @@
 pyodbc
 pandas
 sqlalchemy
+werkzeug
+flask
+flask_cors
